@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BridgeAssault</string>
+    <string name="button_play">Play</string>
+    <string name="tag_easy_mode">5 3</string>
 </resources>
