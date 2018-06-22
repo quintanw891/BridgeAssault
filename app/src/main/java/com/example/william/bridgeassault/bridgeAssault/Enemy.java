@@ -18,11 +18,11 @@ public class Enemy implements Comparable<Enemy> {
      * @return true if the enemy is no longer attacking as a result of the movement, false otherwise;
      */
     public boolean move(Bridge bridge){
-        boolean leftBridge = false;
-        if(row == bridge.rows-1){
-            leftBridge = true;
+        boolean doneCrossingBridge = false;
+        if(++row > bridge.rows-1){
+            doneCrossingBridge = true;
         }
-        return leftBridge;
+        return doneCrossingBridge;
     }
 
     @Override

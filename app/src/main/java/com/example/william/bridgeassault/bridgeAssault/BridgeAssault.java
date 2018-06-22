@@ -12,16 +12,17 @@ import java.util.TimerTask;
 
 public class BridgeAssault {
 
-    private final int MIN_BRIDGE_ROWS = 5;
+    private final int MIN_BRIDGE_ROWS = 6;
     private final int MIN_BRIDGE_COLUMNS = 3;
-    private final int SEND_ENEMY_DELAY = 1000;
+    private final int SEND_ENEMY_DELAY = 3000;
+    private final int MOVE_ENEMY_DELAY = 1000;
 
     private int numEnemies;
     public Bridge bridge;
     private Enemy[] enemies;
     private int nextEnemyIndex;
     private ArrayList<Enemy> attackingEnemies;
-    private Timer sendEnemyTimer, enemyMovementTimer;
+    private Timer sendEnemyTimer, moveEnemyTimer;
     private TimerTask sendEnemy, moveEnemies;
 
     public BridgeAssault(int n, int rows, int columns) {
@@ -50,13 +51,18 @@ public class BridgeAssault {
                     sendEnemyTimer.cancel();
             }
         };
+        moveEnemyTimer = new Timer();
         moveEnemies = new TimerTask() {
             public void run() {
                 if(attackingEnemies.size() == 0){
                     return;
                 }
                 for(int i=0; i<attackingEnemies.size(); i++){
-                    attackingEnemies.get(i).move(bridge);
+                    Enemy enemyToMove = attackingEnemies.get(i);
+                    Log.d("MOVING",enemyToMove.toString());
+                    if(enemyToMove.move(bridge)){
+                        attackingEnemies.remove(enemyToMove);
+                    }
                 }
             }
         };
@@ -65,6 +71,7 @@ public class BridgeAssault {
 
     public void startGame(){
         sendEnemyTimer.schedule(sendEnemy, 0, SEND_ENEMY_DELAY);
+        moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
     public void endGame(){
