@@ -60,8 +60,19 @@ public class BridgeAssault {
                 for(int i=0; i<attackingEnemies.size(); i++){
                     Enemy enemyToMove = attackingEnemies.get(i);
                     Log.d("MOVING",enemyToMove.toString());
-                    if(enemyToMove.move(bridge)){
+                    if(enemyToMove.getRow()+1 == bridge.rows){
+                        //TODO hit player
+                    }
+                    if(enemyToMove.move(bridge))
                         attackingEnemies.remove(enemyToMove);
+                    //check if this movement caused elimination of any other attacking enemies
+                    for(int j=0; j<attackingEnemies.size(); j++){
+                        Enemy enemyToCheck = attackingEnemies.get(j);
+                        Space spaceOfEnemy = bridge.spaces[enemyToCheck.getRow()][enemyToCheck.getColumn()];
+                        if(spaceOfEnemy.getType() == SpaceType.BROKEN ||
+                                spaceOfEnemy.getType() == SpaceType.FILLED){
+                            attackingEnemies.remove(enemyToCheck);
+                        }
                     }
                 }
             }

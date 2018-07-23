@@ -5,5 +5,5 @@ package com.example.william.bridgeassault.bridgeAssault;
  */
 
 public enum SpaceType {
-    NORMAL, CRACKED, BROKEN, FILLED, OCCUPIED;
+    NORMAL, CRACKED, BROKEN, FILLED, FILLED_OCCUPIED, OCCUPIED;
 }
