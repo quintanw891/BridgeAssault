@@ -121,7 +121,7 @@ public class Enemy implements Comparable<Enemy> {
     }
 
     public int getColumn() {
-        return row;
+        return column;
     }
 
     public void setRow(int row) {

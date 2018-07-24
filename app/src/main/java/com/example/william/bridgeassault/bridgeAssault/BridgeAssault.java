@@ -2,9 +2,9 @@ package com.example.william.bridgeassault.bridgeAssault;
 
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 /**
  * Created by William on 1/8/2018.
@@ -21,7 +21,7 @@ public class BridgeAssault {
     public Bridge bridge;
     private Enemy[] enemies;
     private int nextEnemyIndex;
-    private ArrayList<Enemy> attackingEnemies;
+    private Vector<Enemy> attackingEnemies;
     private Timer sendEnemyTimer, moveEnemyTimer;
     private TimerTask sendEnemy, moveEnemies;
 
@@ -36,7 +36,7 @@ public class BridgeAssault {
         for (int i = 0; i < numEnemies; i++)
             enemies[i] = new Enemy();
         nextEnemyIndex = 0;
-        attackingEnemies = new ArrayList<Enemy>();
+        attackingEnemies = new Vector<Enemy>();
         sendEnemyTimer = new Timer();
         sendEnemy = new TimerTask() {
             public void run() {
@@ -54,16 +54,13 @@ public class BridgeAssault {
         moveEnemyTimer = new Timer();
         moveEnemies = new TimerTask() {
             public void run() {
-                if(attackingEnemies.size() == 0){
-                    return;
-                }
                 for(int i=0; i<attackingEnemies.size(); i++){
                     Enemy enemyToMove = attackingEnemies.get(i);
                     Log.d("MOVING",enemyToMove.toString());
                     if(enemyToMove.getRow()+1 == bridge.rows){
                         //TODO hit player
                     }
-                    if(enemyToMove.move(bridge))
+                    if(!enemyToMove.move(bridge))
                         attackingEnemies.remove(enemyToMove);
                     //check if this movement caused elimination of any other attacking enemies
                     for(int j=0; j<attackingEnemies.size(); j++){
@@ -81,7 +78,7 @@ public class BridgeAssault {
     }
 
     public void startGame(){
-        sendEnemyTimer.schedule(sendEnemy, 0, SEND_ENEMY_DELAY);
+        sendEnemyTimer.schedule(sendEnemy, 500, SEND_ENEMY_DELAY);
         moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
