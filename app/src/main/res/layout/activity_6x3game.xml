@@ -46,6 +46,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="0 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -54,6 +56,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="0 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -62,6 +66,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="0 2"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -70,6 +76,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="1 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -78,6 +86,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="1 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -86,6 +96,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="1 2"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -94,6 +106,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="2 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -102,6 +116,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="2 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -110,6 +126,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="2 2"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -118,6 +136,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="3 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -126,6 +146,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="3 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -134,6 +156,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="3 2"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -142,6 +166,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="4 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -150,6 +176,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="4 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -158,6 +186,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="4 2"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -166,6 +196,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="5 0"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -174,6 +206,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="5 1"
                     app:srcCompat="@drawable/normal_space" />
 
                 <ImageView
@@ -182,6 +216,8 @@
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
                     android:layout_rowWeight="1"
+                    android:onClick="crackSpace"
+                    android:tag="5 2"
                     app:srcCompat="@drawable/normal_space" />
             </GridLayout>
 

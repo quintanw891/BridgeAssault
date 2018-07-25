@@ -7,6 +7,7 @@ import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.example.william.bridgeassault.bridgeAssault.*;
@@ -80,6 +81,18 @@ public class GameActivity extends AppCompatActivity {
                                 //Log.d("SPACE","is cracked");
                                 imageDrawable = getDrawable(R.drawable.cracked_space);
                                 break;
+                            case BROKEN:
+                                //Log.d("SPACE","is broken");
+                                imageDrawable = getDrawable(R.drawable.broken_space);
+                                break;
+                            case FILLED:
+                                //Log.d("SPACE","is filled");
+                                imageDrawable = getDrawable(R.drawable.filled_space);
+                                break;
+                            case FILLED_OCCUPIED:
+                                //Log.d("SPACE","is filled_occupied");
+                                imageDrawable = getDrawable(R.drawable.filled_occupied_space);
+                                break;
                             case OCCUPIED:
                                 //Log.d("SPACE","is occupied");
                                 imageDrawable = getDrawable(R.drawable.occupied_space);
@@ -104,6 +117,15 @@ public class GameActivity extends AppCompatActivity {
         game = new BridgeAssault(numEnemies,rows,columns);
         game.startGame();
 
+    }
+
+    public void crackSpace(View view) {
+        //Log.d("TAPPED", "space at "+view.getTag().toString());
+        StringTokenizer tokens = new StringTokenizer(view.getTag().toString());
+        int row = Integer.parseInt(tokens.nextToken());
+        int column = Integer.parseInt(tokens.nextToken());
+        if(game.bridge.spaces[row][column].getType() == SpaceType.NORMAL)
+            game.bridge.spaces[row][column].setType(SpaceType.CRACKED);
     }
 
 }
