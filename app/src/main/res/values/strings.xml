@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">BridgeAssault</string>
     <string name="button_play">Easy</string>
-    <string name="tag_easy_mode">6 5 3</string>
+    <string name="tag_easy_mode">6 15 3</string>
 </resources>
