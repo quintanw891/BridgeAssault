@@ -31,7 +31,7 @@ public class BridgeAssault {
             columns = MIN_BRIDGE_COLUMNS;
         }
         numEnemies = n;
-        bridge = new Bridge(rows,columns);
+        bridge = new Bridge(rows, columns);
         enemies = new Enemy[numEnemies];
         for (int i = 0; i < numEnemies; i++)
             enemies[i] = new Enemy();
@@ -43,10 +43,16 @@ public class BridgeAssault {
                 Enemy nextEnemy = enemies[nextEnemyIndex];
                 nextEnemy.setRow(0);
                 nextEnemy.setColumn(1);//TODO have enemy choose a column
-                attackingEnemies.add(nextEnemy);
-                Log.d("SENDING",nextEnemy.toString());
-                bridge.spaces[nextEnemy.getRow()][nextEnemy.getColumn()].setType(SpaceType.OCCUPIED);
-                nextEnemyIndex++;
+                //Log.d("SENDING", nextEnemy.toString());
+                Enemy.MoveResults results = nextEnemy.enterBridge(bridge);
+                if (results.movementSuccessful) {
+                    if (results.enemyIsAttacking) {
+                        attackingEnemies.add(nextEnemy);
+                        //check if this movement caused elimination of any other attacking enemies
+                        checkForEliminations(bridge);
+                    }
+                    nextEnemyIndex++;
+                }
                 if (nextEnemyIndex >= numEnemies)
                     sendEnemyTimer.cancel();
             }
@@ -54,35 +60,39 @@ public class BridgeAssault {
         moveEnemyTimer = new Timer();
         moveEnemies = new TimerTask() {
             public void run() {
-                for(int i=0; i<attackingEnemies.size(); i++){
+                for (int i = 0; i < attackingEnemies.size(); i++) {
                     Enemy enemyToMove = attackingEnemies.get(i);
-                    Log.d("MOVING",enemyToMove.toString());
-                    if(enemyToMove.getRow()+1 == bridge.rows){
+                    //Log.d("MOVING",enemyToMove.toString());
+                    if (enemyToMove.getRow() + 1 == bridge.rows) {
                         //TODO hit player
                     }
-                    if(!enemyToMove.move(bridge))
+                    if (!enemyToMove.move(bridge).enemyIsAttacking)
                         attackingEnemies.remove(enemyToMove);
                     //check if this movement caused elimination of any other attacking enemies
-                    for(int j=0; j<attackingEnemies.size(); j++){
-                        Enemy enemyToCheck = attackingEnemies.get(j);
-                        Space spaceOfEnemy = bridge.spaces[enemyToCheck.getRow()][enemyToCheck.getColumn()];
-                        if(spaceOfEnemy.getType() == SpaceType.BROKEN ||
-                                spaceOfEnemy.getType() == SpaceType.FILLED){
-                            attackingEnemies.remove(enemyToCheck);
-                        }
-                    }
+                    checkForEliminations(bridge);
                 }
             }
         };
 
     }
 
-    public void startGame(){
+    private void checkForEliminations(Bridge bridge) {
+        for (int i = 0; i < attackingEnemies.size(); i++) {
+            Enemy enemyToCheck = attackingEnemies.get(i);
+            Space spaceOfEnemy = bridge.spaces[enemyToCheck.getRow()][enemyToCheck.getColumn()];
+            if (spaceOfEnemy.getType() == SpaceType.BROKEN ||
+                    spaceOfEnemy.getType() == SpaceType.FILLED) {
+                attackingEnemies.remove(enemyToCheck);
+            }
+        }
+    }
+
+    public void startGame() {
         sendEnemyTimer.schedule(sendEnemy, 500, SEND_ENEMY_DELAY);
         moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
-    public void endGame(){
+    public void endGame() {
         //TODO ???
     }
 }
