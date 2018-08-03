@@ -20,6 +20,7 @@ public class Enemy implements Comparable<Enemy> {
 
     /**
      * Move the enemy along a bridge.
+     *
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
      */
@@ -37,63 +38,35 @@ public class Enemy implements Comparable<Enemy> {
         } else {
             switch (bridge.spaces[row + 1][column].getType()) {
                 case NORMAL:
-                case FILLED:
                     row++;
                     bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                    break;
+                case FILLED:
+                    row++;
+                    bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
                     break;
                 case CRACKED:
                     row++;
                     results.enemyIsAttacking = false;
-                    //if cracked space is not last space, check next space
-                    if (row + 1 != bridge.rows) {
-                        if (bridge.spaces[row + 1][column].getType() == SpaceType.FILLED ||
-                                bridge.spaces[row + 1][column].getType() == SpaceType.FILLED_OCCUPIED ||
-                                bridge.spaces[row + 1][column].getType() == SpaceType.BROKEN) {
-                            //enemy falls
-                            bridge.spaces[row][column].setType(SpaceType.BROKEN);
-                            bridge.spaces[row + 1][column].setType(SpaceType.BROKEN);
-                        }
-                    }
-                    //if cracked space is not first space, check previous space
-                    if (row != 0) {
-                        if (bridge.spaces[row - 1][column].getType() == SpaceType.FILLED ||
-                                bridge.spaces[row - 1][column].getType() == SpaceType.FILLED_OCCUPIED ||
-                                bridge.spaces[row - 1][column].getType() == SpaceType.BROKEN) {
-                            //enemy falls
-                            bridge.spaces[row][column].setType(SpaceType.BROKEN);
-                            bridge.spaces[row - 1][column].setType(SpaceType.BROKEN);
-                        }
-                    }
-                    if (bridge.spaces[row][column].getType() != SpaceType.BROKEN) {
-                        //enemy hangs on
-                        bridge.spaces[row][column].setType(SpaceType.FILLED);
-                    }
+                    breakSpace(bridge);
                     break;
                 case BROKEN:
-                    if (row + 2 == bridge.rows) {//if broken space is last space
-                        //enemy hangs on
+                    if(canFill(bridge,row+1, column)){
                         bridge.spaces[row + 1][column].setType(SpaceType.FILLED);
                         results.enemyIsAttacking = false;
-                    } else {
-                        if (bridge.spaces[row + 2][column].getType() == SpaceType.NORMAL ||
-                                bridge.spaces[row + 2][column].getType() == SpaceType.CRACKED ||
-                                bridge.spaces[row + 2][column].getType() == SpaceType.OCCUPIED) {
-                            //enemy hangs on
-                            bridge.spaces[row + 1][column].setType(SpaceType.FILLED);
-                            results.enemyIsAttacking = false;
-                        } else {//enemy can't move down
-                            //try to move left or right
-                            results = moveLateral(bridge);
-                            if (!results.movementSuccessful) {//enemy can't move
-                                //reset current space to correct type.
-                                if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
-                                    bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
-                                else//if the current space was changed to FILLED
-                                    bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
-                            }
-                        }
                     }
-                    break;
+                    else{//enemy can't move down
+                    //try to move left or right
+                    results = moveLateral(bridge);
+                    if (!results.movementSuccessful) {//enemy can't move
+                        //reset current space to correct type.
+                        if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
+                            bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                        else//if the current space was changed to FILLED
+                            bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    }
+                }
+                break;
                 case OCCUPIED:
                 case FILLED_OCCUPIED:
                     //try to move left or right
@@ -113,6 +86,7 @@ public class Enemy implements Comparable<Enemy> {
 
     /**
      * Move the enemy to the left or right of its position on the bridge
+     *
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
      */
@@ -133,16 +107,49 @@ public class Enemy implements Comparable<Enemy> {
 
     /**
      * Move the enemy to the left of its position on the bridge
+     *
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
      */
     private MoveResults moveLeft(Bridge bridge) {
-        MoveResults results = new MoveResults(false, false);
+        MoveResults results = new MoveResults(true, true);
+        if (column == 0) {//if already in leftmost column
+            results.movementSuccessful = false;
+        } else {
+            switch (bridge.spaces[column - 1][row].getType()) {
+                case NORMAL:
+                    column--;
+                    bridge.spaces[column][row].setType(SpaceType.OCCUPIED);
+                    break;
+                case FILLED:
+                    column--;
+                    bridge.spaces[column][row].setType(SpaceType.FILLED_OCCUPIED);
+                    break;
+                case CRACKED:
+                    column--;
+                    results.enemyIsAttacking = false;
+                    breakSpace(bridge);
+                    break;
+                case BROKEN:
+                    if (canFill(bridge, row, column - 1)) {
+                        //enemy hangs on
+                        bridge.spaces[row][column - 1].setType(SpaceType.FILLED);
+                        results.enemyIsAttacking = false;
+                    } else {//enemy can't move left
+                        results.movementSuccessful = false;
+                    }
+                    break;
+                case OCCUPIED:
+                case FILLED_OCCUPIED:
+                    break;
+            }
+        }
         return results;
     }
 
     /**
      * Move the enemy to the right of its position on the bridge
+     *
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
      */
@@ -152,7 +159,72 @@ public class Enemy implements Comparable<Enemy> {
     }
 
     /**
+     * Break the space that the enemy is positioned on. Either fall through the bridge or hang on
+     * depending on the conditions of surrounding spaces.
+     *
+     * @param bridge the bridge where the enemy is positioned
+     */
+    private void breakSpace(Bridge bridge) {
+        //if this space is not last space, check next space
+        if (row + 1 != bridge.rows) {
+            if (bridge.spaces[row + 1][column].getType() == SpaceType.FILLED ||
+                    bridge.spaces[row + 1][column].getType() == SpaceType.FILLED_OCCUPIED ||
+                    bridge.spaces[row + 1][column].getType() == SpaceType.BROKEN) {
+                //enemy falls
+                bridge.spaces[row][column].setType(SpaceType.BROKEN);
+                bridge.spaces[row + 1][column].setType(SpaceType.BROKEN);
+            }
+        }
+        //if this space is not first space, check previous space
+        if (row != 0) {
+            if (bridge.spaces[row - 1][column].getType() == SpaceType.FILLED ||
+                    bridge.spaces[row - 1][column].getType() == SpaceType.FILLED_OCCUPIED ||
+                    bridge.spaces[row - 1][column].getType() == SpaceType.BROKEN) {
+                //enemy falls
+                bridge.spaces[row][column].setType(SpaceType.BROKEN);
+                bridge.spaces[row - 1][column].setType(SpaceType.BROKEN);
+            }
+        }
+        if (bridge.spaces[row][column].getType() != SpaceType.BROKEN) {
+            //enemy hangs on
+            bridge.spaces[row][column].setType(SpaceType.FILLED);
+        }
+    }
+
+    /**
+     * Determines whether or not the specified space can be filled by the enemy.
+     *
+     * @param bridge the bridge where the space is.
+     * @param row    the row that the space is on.
+     * @param column the column that the space is on.
+     * @return true if the enemy can fill the specified space, false otherwise.
+     */
+    private boolean canFill(Bridge bridge, int row, int column) {
+        if (bridge.spaces[row][column].getType() != SpaceType.BROKEN) {
+            return false;
+        }
+        //whether or not the enemy can grab the spaces below and above the broken space
+        //Grabable spaces are NORMAL, CRACKED, OCCUPIED, or either end of the bridge.
+        boolean canGrabAbove = false;
+        boolean canGrabBelow = false;
+        if (row == 0 ||
+                bridge.spaces[row - 1][column].getType() == SpaceType.NORMAL ||
+                bridge.spaces[row - 1][column].getType() == SpaceType.CRACKED ||
+                bridge.spaces[row - 1][column].getType() == SpaceType.OCCUPIED) {
+            canGrabAbove = true;
+        }
+        if (row + 1 == bridge.rows ||
+                bridge.spaces[row + 1][column].getType() == SpaceType.NORMAL ||
+                bridge.spaces[row + 1][column].getType() == SpaceType.CRACKED ||
+                bridge.spaces[row + 1][column].getType() == SpaceType.OCCUPIED) {
+            canGrabBelow = true;
+        }
+        return canGrabAbove && canGrabBelow;
+    }
+
+    /**
      * Enter a bridge by moving to one of the spaces on the bridge's top row.
+     *
      * @param bridge the bridge to enter
      * @return MoveResults object recording the status of the enemy after movement
      */
@@ -184,7 +256,8 @@ public class Enemy implements Comparable<Enemy> {
     /**
      * Enter a bridge at a specified column by moving to the top row space of the bridge's
      * specified column.
-     * @param bridge the bridge to enter.
+     *
+     * @param bridge      the bridge to enter.
      * @param columnToTry the column to enter the bridge at
      * @return MoveResults object recording the status of the enemy after movement
      */
@@ -196,9 +269,12 @@ public class Enemy implements Comparable<Enemy> {
         column = columnToTry;
         switch (bridge.spaces[0][columnToTry].getType()) {
             case NORMAL:
-            case FILLED:
                 results = new MoveResults(true, true);
                 bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                break;
+            case FILLED:
+                results = new MoveResults(true, true);
+                bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
                 break;
             case CRACKED:
                 results = new MoveResults(true, false);
