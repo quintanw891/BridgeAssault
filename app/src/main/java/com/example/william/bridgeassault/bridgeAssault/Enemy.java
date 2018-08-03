@@ -31,7 +31,6 @@ public class Enemy implements Comparable<Enemy> {
         else//if the enemy's space is FILLED_OCCUPIED
             bridge.spaces[row][column].setType(SpaceType.FILLED);
         MoveResults results = new MoveResults(true, true);
-        results.enemyIsAttacking = true;
         if (row + 1 == bridge.rows) {//if enemy is about to finish crossing the bridge
             results.enemyIsAttacking = false;
             Log.d("FINISH", "");
@@ -51,32 +50,23 @@ public class Enemy implements Comparable<Enemy> {
                     breakSpace(bridge);
                     break;
                 case BROKEN:
-                    if(canFill(bridge,row+1, column)){
+                    if (canFill(bridge, row + 1, column)) {
                         bridge.spaces[row + 1][column].setType(SpaceType.FILLED);
                         results.enemyIsAttacking = false;
                     }
-                    else{//enemy can't move down
-                    //try to move left or right
-                    results = moveLateral(bridge);
-                    if (!results.movementSuccessful) {//enemy can't move
-                        //reset current space to correct type.
-                        if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
-                            bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
-                        else//if the current space was changed to FILLED
-                            bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
-                    }
-                }
-                break;
+                    //This case falls through to next cases
                 case OCCUPIED:
                 case FILLED_OCCUPIED:
-                    //try to move left or right
-                    results = moveLateral(bridge);
-                    if (!results.movementSuccessful) {//enemy can't move
-                        //reset current space to correct type.
-                        if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
-                            bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
-                        else//if the current space was changed to FILLED
-                            bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    if(results.enemyIsAttacking == true){
+                        //try to move left or right
+                        results = moveLateral(bridge);
+                        if (!results.movementSuccessful) {//enemy can't move
+                            //reset current space to correct type.
+                            if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
+                                bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                            else//if the current space was changed to FILLED
+                                bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                        }
                     }
                     break;
             }
@@ -85,7 +75,7 @@ public class Enemy implements Comparable<Enemy> {
     }
 
     /**
-     * Move the enemy to the left or right of its position on the bridge
+     * Move the enemy one space randomly to the left or right of its position on the bridge
      *
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
@@ -93,47 +83,63 @@ public class Enemy implements Comparable<Enemy> {
     private MoveResults moveLateral(Bridge bridge) {
         MoveResults results;
         Random r = new Random();
-        if (r.nextInt(1) > 0) {   //try left first
-            results = moveLeft(bridge);
+        if (r.nextInt(2) > 0) {   //try left first
+            results = moveLateral(bridge, -1);
             if (!results.movementSuccessful)
-                results = moveRight(bridge);
+                results = moveLateral(bridge, 1);
         } else {                          //try right first
-            results = moveRight(bridge);
+            results = moveLateral(bridge, 1);
             if (!results.movementSuccessful)
-                results = moveLeft(bridge);
+                results = moveLateral(bridge, -1);
         }
         return results;
     }
 
     /**
-     * Move the enemy to the left of its position on the bridge
+     * Move the enemy one space to the left or right of its position on the bridge.
      *
      * @param bridge the bridge to move along
+     * @param direction the direction to move. Positive values and 0 = right, negative values = left.
      * @return MoveResults object recording the status of the enemy after movement
      */
-    private MoveResults moveLeft(Bridge bridge) {
+    private MoveResults moveLateral(Bridge bridge, int direction) {
         MoveResults results = new MoveResults(true, true);
-        if (column == 0) {//if already in leftmost column
-            results.movementSuccessful = false;
-        } else {
-            switch (bridge.spaces[column - 1][row].getType()) {
+        int boundary;//the last column in the enemy's path that they can occupy.
+        int toColumn;//the column to move to.
+        if(direction >= 0){//moving right
+            boundary = bridge.columns - 1;
+            toColumn = column + 1;
+            if(toColumn > boundary){
+                results.movementSuccessful = false;
+            }
+            direction = 1;
+        }else{//moving left
+            boundary = 0;
+            toColumn = column - 1;
+            if(toColumn < boundary){
+                results.movementSuccessful = false;
+            }
+            direction = -1;
+        }
+        if (results.movementSuccessful) {
+            switch (bridge.spaces[row][column + direction].getType()) {
                 case NORMAL:
-                    column--;
-                    bridge.spaces[column][row].setType(SpaceType.OCCUPIED);
+                    column += direction;
+                    bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
                     break;
                 case FILLED:
-                    column--;
-                    bridge.spaces[column][row].setType(SpaceType.FILLED_OCCUPIED);
+                    column += direction;
+                    bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
                     break;
                 case CRACKED:
-                    column--;
+                    column += direction;
                     results.enemyIsAttacking = false;
                     breakSpace(bridge);
                     break;
                 case BROKEN:
-                    if (canFill(bridge, row, column - 1)) {
+                    if (canFill(bridge, row, column + direction)) {
                         //enemy hangs on
-                        bridge.spaces[row][column - 1].setType(SpaceType.FILLED);
+                        bridge.spaces[row][column += direction].setType(SpaceType.FILLED);
                         results.enemyIsAttacking = false;
                     } else {//enemy can't move left
                         results.movementSuccessful = false;
@@ -141,20 +147,10 @@ public class Enemy implements Comparable<Enemy> {
                     break;
                 case OCCUPIED:
                 case FILLED_OCCUPIED:
+                    results.movementSuccessful = false;
                     break;
             }
         }
-        return results;
-    }
-
-    /**
-     * Move the enemy to the right of its position on the bridge
-     *
-     * @param bridge the bridge to move along
-     * @return MoveResults object recording the status of the enemy after movement
-     */
-    private MoveResults moveRight(Bridge bridge) {
-        MoveResults results = new MoveResults(false, false);
         return results;
     }
 

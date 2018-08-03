@@ -1,6 +1,7 @@
 package com.example.william.bridgeassault;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Process;
@@ -92,10 +93,12 @@ public class GameActivity extends AppCompatActivity {
                             case FILLED_OCCUPIED:
                                 //Log.d("SPACE","is filled_occupied");
                                 imageDrawable = getDrawable(R.drawable.filled_occupied_space);
+                                imageDrawable.setColorFilter( 0xffff0000, PorterDuff.Mode.DST_OVER );
                                 break;
                             case OCCUPIED:
                                 //Log.d("SPACE","is occupied");
                                 imageDrawable = getDrawable(R.drawable.occupied_space);
+                                imageDrawable.setColorFilter( 0xffff0000, PorterDuff.Mode.DST_OVER );
                                 //TODO check for other types of spaces
                                 break;
                         }
