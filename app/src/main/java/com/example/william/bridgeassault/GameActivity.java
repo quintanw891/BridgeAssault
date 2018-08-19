@@ -122,13 +122,15 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-    public void crackSpace(View view) {
+    public void tapSpace(View view) {
         //Log.d("TAPPED", "space at "+view.getTag().toString());
         StringTokenizer tokens = new StringTokenizer(view.getTag().toString());
         int row = Integer.parseInt(tokens.nextToken());
         int column = Integer.parseInt(tokens.nextToken());
         if(game.bridge.spaces[row][column].getType() == SpaceType.NORMAL)
             game.bridge.spaces[row][column].setType(SpaceType.CRACKED);
+        if(game.bridge.spaces[row][column].getType() == SpaceType.BROKEN)
+            game.bridge.spaces[row][column].setType(SpaceType.NORMAL);
     }
 
 }

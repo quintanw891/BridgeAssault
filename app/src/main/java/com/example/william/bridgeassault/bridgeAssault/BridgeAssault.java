@@ -8,12 +8,14 @@ import java.util.Vector;
 
 /**
  * Created by William on 1/8/2018.
+ *
  */
 
 public class BridgeAssault {
 
     private final int MIN_BRIDGE_ROWS = 6;
     private final int MIN_BRIDGE_COLUMNS = 3;
+    private final int MAX_HP = 5;
     private final int SEND_ENEMY_DELAY = 3000;
     private final int MOVE_ENEMY_DELAY = 1000;
 
@@ -24,6 +26,7 @@ public class BridgeAssault {
     private Vector<Enemy> attackingEnemies;
     private Timer sendEnemyTimer, moveEnemyTimer;
     private TimerTask sendEnemy, moveEnemies;
+    private int hp;
 
     public BridgeAssault(int n, int rows, int columns) {
         if (rows < MIN_BRIDGE_ROWS || columns < MIN_BRIDGE_COLUMNS) {
@@ -64,16 +67,29 @@ public class BridgeAssault {
                     Enemy enemyToMove = attackingEnemies.get(i);
                     //Log.d("MOVING",enemyToMove.toString());
                     if (enemyToMove.getRow() + 1 == bridge.rows) {
-                        //TODO hit player
-                    }
-                    if (!enemyToMove.move(bridge).enemyIsAttacking)
+                        //hit player
+                        bridge.spaces[enemyToMove.getRow()][enemyToMove.getColumn()].setType(SpaceType.NORMAL);
                         attackingEnemies.remove(enemyToMove);
-                    //check if this movement caused elimination of any other attacking enemies
-                    checkForEliminations(bridge);
+                        hp--;
+                        Log.d("HP", Integer.toString(hp));
+                        if(hp <= 0){
+                            endGame();
+                        }
+                    }
+                    else {
+                        if (!enemyToMove.move(bridge).enemyIsAttacking) {
+                            attackingEnemies.remove(enemyToMove);
+                            //check if this movement caused elimination of any other attacking enemies
+                            checkForEliminations(bridge);
+                            if(bridge.isBroken()){
+                                endGame();
+                            }
+                        }
+                    }
                 }
             }
         };
-
+        hp = MAX_HP;
     }
 
     private void checkForEliminations(Bridge bridge) {
@@ -92,7 +108,9 @@ public class BridgeAssault {
         moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
-    public void endGame() {
-        //TODO ???
+    private void endGame() {
+        Log.d("GAME","OVER");
+        sendEnemyTimer.cancel();
+        moveEnemyTimer.cancel();
     }
 }

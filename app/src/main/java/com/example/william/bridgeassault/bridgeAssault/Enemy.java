@@ -1,18 +1,20 @@
 package com.example.william.bridgeassault.bridgeAssault;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.util.Random;
 
 /**
  * Created by William on 1/4/2018.
+ *
  */
 public class Enemy implements Comparable<Enemy> {
 
     private int id, row, column;
     private static int numEnemies;
 
-    public Enemy() {
+    Enemy() {
         id = ++numEnemies;
         row = -1;
         column = -1;
@@ -24,7 +26,7 @@ public class Enemy implements Comparable<Enemy> {
      * @param bridge the bridge to move along
      * @return MoveResults object recording the status of the enemy after movement
      */
-    public MoveResults move(Bridge bridge) {
+    MoveResults move(Bridge bridge) {
         //Change the enemy's current space to the appropriate type assuming they will move
         if (bridge.spaces[row][column].getType() == SpaceType.OCCUPIED)
             bridge.spaces[row][column].setType(SpaceType.NORMAL);
@@ -33,7 +35,7 @@ public class Enemy implements Comparable<Enemy> {
         MoveResults results = new MoveResults(true, true);
         if (row + 1 == bridge.rows) {//if enemy is about to finish crossing the bridge
             results.enemyIsAttacking = false;
-            Log.d("FINISH", "");
+            //Log.d("FINISH", "FINISH");
         } else {
             switch (bridge.spaces[row + 1][column].getType()) {
                 case NORMAL:
@@ -57,15 +59,25 @@ public class Enemy implements Comparable<Enemy> {
                     //This case falls through to next cases
                 case OCCUPIED:
                 case FILLED_OCCUPIED:
-                    if(results.enemyIsAttacking == true){
+                    if(results.enemyIsAttacking){
                         //try to move left or right
                         results = moveLateral(bridge);
-                        if (!results.movementSuccessful) {//enemy can't move
-                            //reset current space to correct type.
-                            if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
-                                bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
-                            else//if the current space was changed to FILLED
-                                bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                        if (!results.movementSuccessful) {
+                            //try to move back
+                            results = moveBack(bridge);
+                            if(!results.movementSuccessful) {
+                                if(row == 0){
+                                    //try to re-enter bridge at another column (top row only)
+                                    results = enterBridge(bridge);
+                                }
+                                if(!results.movementSuccessful){//enemy can't move
+                                    //reset current space to correct type.
+                                    if (bridge.spaces[row][column].getType() == SpaceType.NORMAL)
+                                        bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                                    else//if the current space was changed to FILLED
+                                        bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                                }
+                            }
                         }
                     }
                     break;
@@ -139,7 +151,54 @@ public class Enemy implements Comparable<Enemy> {
                 case BROKEN:
                     if (canFill(bridge, row, column + direction)) {
                         //enemy hangs on
-                        bridge.spaces[row][column += direction].setType(SpaceType.FILLED);
+                        column += direction;
+                        bridge.spaces[row][column].setType(SpaceType.FILLED);
+                        results.enemyIsAttacking = false;
+                    } else {
+                        results.movementSuccessful = false;
+                    }
+                    break;
+                case OCCUPIED:
+                case FILLED_OCCUPIED:
+                    results.movementSuccessful = false;
+                    break;
+            }
+        }
+        return results;
+    }
+
+    /**
+     * Move the enemy one space above of its position on the bridge.
+     *
+     * @param bridge the bridge to move along
+     * @return MoveResults object recording the status of the enemy after movement
+     */
+    private MoveResults moveBack(Bridge bridge){
+        MoveResults results = new MoveResults(true, true);
+        if(row == 0){
+            results.movementSuccessful = false;
+        }
+        else{
+            switch (bridge.spaces[row - 1][column].getType()) {
+                case NORMAL:
+                    Log.d("BACK","NORMAL");
+                    row--;
+                    bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                    break;
+                case FILLED:
+                    row--;
+                    bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    break;
+                case CRACKED:
+                    row--;
+                    results.enemyIsAttacking = false;
+                    breakSpace(bridge);
+                    break;
+                case BROKEN:
+                    if (canFill(bridge, row - 1, column)) {
+                        //enemy hangs on
+                        row--;
+                        bridge.spaces[row][column].setType(SpaceType.FILLED);
                         results.enemyIsAttacking = false;
                     } else {//enemy can't move left
                         results.movementSuccessful = false;
@@ -224,8 +283,8 @@ public class Enemy implements Comparable<Enemy> {
      * @param bridge the bridge to enter
      * @return MoveResults object recording the status of the enemy after movement
      */
-    public MoveResults enterBridge(Bridge bridge) {
-        MoveResults results = new MoveResults(false, false);
+    MoveResults enterBridge(Bridge bridge) {
+        MoveResults results;
         //try to enter the bridge at each of its columns in random order
         int[] attemptOrder = new int[bridge.columns];
         for (int i = 0; i < attemptOrder.length; i++) {
@@ -244,7 +303,7 @@ public class Enemy implements Comparable<Enemy> {
         do {
             results = moveColumn(attemptOrder[i], bridge);
             i++;
-        } while (results.movementSuccessful == false && i < attemptOrder.length);
+        } while (!results.movementSuccessful && i < attemptOrder.length);
 
         return results;
     }
@@ -274,17 +333,7 @@ public class Enemy implements Comparable<Enemy> {
                 break;
             case CRACKED:
                 results = new MoveResults(true, false);
-                //check the next space, to see if enemy falls
-                if (bridge.spaces[row + 1][column].getType() == SpaceType.FILLED ||
-                        bridge.spaces[row + 1][column].getType() == SpaceType.FILLED_OCCUPIED ||
-                        bridge.spaces[row + 1][column].getType() == SpaceType.BROKEN) {
-                    //enemy falls
-                    bridge.spaces[row][column].setType(SpaceType.BROKEN);
-                    bridge.spaces[row + 1][column].setType(SpaceType.BROKEN);
-                } else {
-                    //enemy hangs on
-                    bridge.spaces[row][column].setType(SpaceType.FILLED);
-                }
+                breakSpace(bridge);
                 break;
             case BROKEN:
                 if (bridge.spaces[row + 1][column].getType() == SpaceType.NORMAL ||
@@ -306,15 +355,15 @@ public class Enemy implements Comparable<Enemy> {
     }
 
     /**
-     * The results of a call to the Enemy class' move(), moveLateral(), moveLeft(), moveRight(), and
+     * The results of a call to the Enemy class' move(), moveLateral(), moveBack(), moveColumn(), and
      * enterBridge() methods. This object holds boolean variables marking the status of the enemy
      * after calling these methods.
      */
-    public class MoveResults {
+    class MoveResults {
         /**
          * Flag marking whether or not the enemy was able to make the attempted movement.
          */
-        public boolean movementSuccessful;
+        boolean movementSuccessful;
         /**
          * Flag marking whether or not the enemy is still attacking. true if the enemy is still
          * attacking as a result of the movement, false otherwise.
@@ -323,7 +372,7 @@ public class Enemy implements Comparable<Enemy> {
          * hanging onto the bridge in a FILLED space or having fallen through the bridge in a BROKEN
          * space and therefore no longer being subject to further movement.
          **/
-        public boolean enemyIsAttacking;
+        boolean enemyIsAttacking;
 
         private MoveResults(boolean entered, boolean attacking) {
             movementSuccessful = entered;
@@ -332,7 +381,7 @@ public class Enemy implements Comparable<Enemy> {
     }
 
     @Override
-    public int compareTo(Enemy o) {
+    public int compareTo(@NonNull Enemy o) {
         if (row > o.row)
             return 1;
         if (row < o.row)
@@ -340,19 +389,19 @@ public class Enemy implements Comparable<Enemy> {
         return 0;
     }
 
-    public int getRow() {
+    int getRow() {
         return row;
     }
 
-    public int getColumn() {
+    int getColumn() {
         return column;
     }
 
-    public void setRow(int row) {
+    void setRow(int row) {
         this.row = row;
     }
 
-    public void setColumn(int column) {
+    void setColumn(int column) {
         this.column = column;
     }
 

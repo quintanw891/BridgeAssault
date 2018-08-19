@@ -2,6 +2,7 @@ package com.example.william.bridgeassault.bridgeAssault;
 
 /**
  * Created by William on 1/8/2018.
+ *
  */
 
 public class Bridge {
@@ -19,4 +20,8 @@ public class Bridge {
         }
     }
 
+    public boolean isBroken(){
+        //TODO isBroken
+        return false;
+    }
 }
