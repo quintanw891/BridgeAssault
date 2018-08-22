@@ -1,14 +1,16 @@
-package com.example.william.bridgeassault.bridgeAssault;
+package com.example.william.bridgeassault.bridgeAssault.bridge;
 
 /**
  * Created by William on 1/8/2018.
  */
 
 public class Space {
-    public SpaceType type;
+    private SpaceType type;
+    boolean toVisit;//used by Bridge class' isBroken() method.
 
-    public Space(){
+    Space(){
         type = SpaceType.NORMAL;
+        toVisit = false;
     }
     public void setType(SpaceType type){
         this.type = type;

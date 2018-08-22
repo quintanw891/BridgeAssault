@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.example.william.bridgeassault.bridgeAssault.*;
+import com.example.william.bridgeassault.bridgeAssault.bridge.Space;
+import com.example.william.bridgeassault.bridgeAssault.bridge.SpaceType;
 
 import java.util.StringTokenizer;
 import java.util.Timer;
@@ -99,7 +101,7 @@ public class GameActivity extends AppCompatActivity {
                                 //Log.d("SPACE","is occupied");
                                 imageDrawable = getDrawable(R.drawable.occupied_space);
                                 imageDrawable.setColorFilter( 0xffff0000, PorterDuff.Mode.DST_OVER );
-                                //TODO check for other types of spaces
+                                //TODO unique color for each enemy
                                 break;
                         }
                         gameSpaces[i][j].setImageDrawable(imageDrawable);

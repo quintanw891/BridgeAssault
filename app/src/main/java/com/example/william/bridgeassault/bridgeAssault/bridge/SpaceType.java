@@ -1,4 +1,4 @@
-package com.example.william.bridgeassault.bridgeAssault;
+package com.example.william.bridgeassault.bridgeAssault.bridge;
 
 /**
  * Created by William on 1/8/2018.

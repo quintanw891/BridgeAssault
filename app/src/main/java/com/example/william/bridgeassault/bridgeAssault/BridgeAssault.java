@@ -2,6 +2,8 @@ package com.example.william.bridgeassault.bridgeAssault;
 
 import android.util.Log;
 
+import com.example.william.bridgeassault.bridgeAssault.bridge.*;
+
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -44,8 +46,6 @@ public class BridgeAssault {
         sendEnemy = new TimerTask() {
             public void run() {
                 Enemy nextEnemy = enemies[nextEnemyIndex];
-                nextEnemy.setRow(0);
-                nextEnemy.setColumn(1);//TODO have enemy choose a column
                 //Log.d("SENDING", nextEnemy.toString());
                 Enemy.MoveResults results = nextEnemy.enterBridge(bridge);
                 if (results.movementSuccessful) {
@@ -82,6 +82,7 @@ public class BridgeAssault {
                             //check if this movement caused elimination of any other attacking enemies
                             checkForEliminations(bridge);
                             if(bridge.isBroken()){
+                                Log.d("BRIDGE","BROKEN");
                                 endGame();
                             }
                         }

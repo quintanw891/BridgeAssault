@@ -3,6 +3,8 @@ package com.example.william.bridgeassault.bridgeAssault;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.william.bridgeassault.bridgeAssault.bridge.*;
+
 import java.util.Random;
 
 /**
@@ -220,6 +222,8 @@ public class Enemy implements Comparable<Enemy> {
      * @param bridge the bridge where the enemy is positioned
      */
     private void breakSpace(Bridge bridge) {
+        //assume enemy can hang on
+        bridge.spaces[row][column].setType(SpaceType.FILLED);
         //if this space is not last space, check next space
         if (row + 1 != bridge.rows) {
             if (bridge.spaces[row + 1][column].getType() == SpaceType.FILLED ||
@@ -239,10 +243,6 @@ public class Enemy implements Comparable<Enemy> {
                 bridge.spaces[row][column].setType(SpaceType.BROKEN);
                 bridge.spaces[row - 1][column].setType(SpaceType.BROKEN);
             }
-        }
-        if (bridge.spaces[row][column].getType() != SpaceType.BROKEN) {
-            //enemy hangs on
-            bridge.spaces[row][column].setType(SpaceType.FILLED);
         }
     }
 
