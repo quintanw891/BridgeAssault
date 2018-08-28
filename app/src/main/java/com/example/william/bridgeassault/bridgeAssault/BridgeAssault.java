@@ -81,8 +81,14 @@ public class BridgeAssault {
                             attackingEnemies.remove(enemyToMove);
                             //check if this movement caused elimination of any other attacking enemies
                             checkForEliminations(bridge);
+                            //check for lose condition: broken bridge
                             if(bridge.isBroken()){
                                 Log.d("BRIDGE","BROKEN");
+                                endGame();
+                            }
+                            //check for win condition: no more enemies
+                            if(attackingEnemies.isEmpty() && nextEnemyIndex >= numEnemies){
+                                Log.d("ENEMIES","FINISHED");
                                 endGame();
                             }
                         }
