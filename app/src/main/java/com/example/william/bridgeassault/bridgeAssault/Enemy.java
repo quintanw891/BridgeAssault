@@ -13,13 +13,24 @@ import java.util.Random;
  */
 public class Enemy implements Comparable<Enemy> {
 
-    private int id, row, column;
+    private int id, row, column, color;
     private static int numEnemies;
 
     Enemy() {
         id = ++numEnemies;
         row = -1;
         column = -1;
+        Random r = new Random();
+
+        int red = 0;
+        int green = r.nextInt(125)+130;
+        int blue = r.nextInt(170);
+
+        red = (red << 16) & 0x00FF0000;
+        green = (green << 8) & 0x0000FF00;
+        blue = blue & 0x000000FF;
+
+        color = 0xFF000000 | red | green | blue;
     }
 
     /**
@@ -43,10 +54,12 @@ public class Enemy implements Comparable<Enemy> {
                 case NORMAL:
                     row++;
                     bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case FILLED:
                     row++;
                     bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case CRACKED:
                     row++;
@@ -140,10 +153,12 @@ public class Enemy implements Comparable<Enemy> {
                 case NORMAL:
                     column += direction;
                     bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case FILLED:
                     column += direction;
                     bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case CRACKED:
                     column += direction;
@@ -186,10 +201,12 @@ public class Enemy implements Comparable<Enemy> {
                     Log.d("BACK","NORMAL");
                     row--;
                     bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case FILLED:
                     row--;
                     bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                    bridge.spaces[row][column].setColor(color);
                     break;
                 case CRACKED:
                     row--;
@@ -326,10 +343,12 @@ public class Enemy implements Comparable<Enemy> {
             case NORMAL:
                 results = new MoveResults(true, true);
                 bridge.spaces[row][column].setType(SpaceType.OCCUPIED);
+                bridge.spaces[row][column].setColor(color);
                 break;
             case FILLED:
                 results = new MoveResults(true, true);
                 bridge.spaces[row][column].setType(SpaceType.FILLED_OCCUPIED);
+                bridge.spaces[row][column].setColor(color);
                 break;
             case CRACKED:
                 results = new MoveResults(true, false);
