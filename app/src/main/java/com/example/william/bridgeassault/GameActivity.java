@@ -1,10 +1,16 @@
 package com.example.william.bridgeassault;
 
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Process;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -95,13 +101,14 @@ public class GameActivity extends AppCompatActivity {
                             case FILLED_OCCUPIED:
                                 //Log.d("SPACE","is filled_occupied");
                                 imageDrawable = getDrawable(R.drawable.filled_occupied_space);
-                                imageDrawable.setColorFilter( 0xffff0000, PorterDuff.Mode.DST_OVER );
+                                imageDrawable = imageDrawable.mutate().getConstantState().newDrawable();
+                                imageDrawable.setColorFilter( board[i][j].getColor(), PorterDuff.Mode.DST_OVER );
                                 break;
                             case OCCUPIED:
                                 //Log.d("SPACE","is occupied");
                                 imageDrawable = getDrawable(R.drawable.occupied_space);
-                                imageDrawable.setColorFilter( 0xffff0000, PorterDuff.Mode.DST_OVER );
-                                //TODO unique color for each enemy
+                                imageDrawable = imageDrawable.mutate().getConstantState().newDrawable();
+                                imageDrawable.setColorFilter( board[i][j].getColor(), PorterDuff.Mode.DST_OVER );
                                 break;
                         }
                         gameSpaces[i][j].setImageDrawable(imageDrawable);

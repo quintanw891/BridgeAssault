@@ -6,6 +6,7 @@ package com.example.william.bridgeassault.bridgeAssault.bridge;
 
 public class Space {
     private SpaceType type;
+    private int enemyColor;
     boolean toVisit;//used by Bridge class' isBroken() method.
 
     Space(){
@@ -18,5 +19,13 @@ public class Space {
 
     public SpaceType getType(){
         return type;
+    }
+
+    public void setColor(int color){
+        enemyColor = color;
+    }
+
+    public int getColor(){
+        return enemyColor;
     }
 }
