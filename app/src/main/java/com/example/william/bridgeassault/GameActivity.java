@@ -1,5 +1,6 @@
 package com.example.william.bridgeassault;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -24,8 +25,9 @@ import com.example.william.bridgeassault.bridgeAssault.bridge.SpaceType;
 import java.util.StringTokenizer;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.function.Consumer;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements GameOverDialogFragment.GameOverDialogListener {
 
     BridgeAssault game;
     ImageView[][] gameSpaces;
@@ -35,6 +37,7 @@ public class GameActivity extends AppCompatActivity {
     private Handler UIHandler;
     private Runnable updateInterface;
     private final int UI_DELAY = 100;
+    private android.support.v4.app.DialogFragment dialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,19 +119,20 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         };
+        game = new BridgeAssault(this,numEnemies,rows,columns);
+
         UITimer = new Timer();
         UIHandler = new Handler();
         UITimerTask = new TimerTask() {
             @Override
             public void run() {
                 UIHandler.post(updateInterface);
+                checkGameOver();
             }
         };
         UITimer.schedule(UITimerTask,0,UI_DELAY);
 
-        game = new BridgeAssault(numEnemies,rows,columns);
         game.startGame();
-
     }
 
     public void tapSpace(View view) {
@@ -142,4 +146,24 @@ public class GameActivity extends AppCompatActivity {
             game.bridge.spaces[row][column].setType(SpaceType.NORMAL);
     }
 
+    private void checkGameOver(){
+        if(game.gameOver && dialogFragment == null){
+            dialogFragment = new GameOverDialogFragment();
+            dialogFragment.setArguments(game.gameOverState);
+            dialogFragment.show(getSupportFragmentManager(), "game over");
+        }
+    }
+
+    @Override
+    public void onDialogPositiveClick(android.support.v4.app.DialogFragment dialog) {
+        //TODO restart game instead of entire activity
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
+    }
+
+    @Override
+    public void onDialogNegativeClick(android.support.v4.app.DialogFragment dialog) {
+        finish();
+    }
 }

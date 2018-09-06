@@ -1,7 +1,13 @@
 package com.example.william.bridgeassault.bridgeAssault;
 
+
+import android.app.Activity;
+import android.support.v4.app.DialogFragment;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.example.william.bridgeassault.GameOverDialogFragment;
 import com.example.william.bridgeassault.bridgeAssault.bridge.*;
 
 import java.util.Timer;
@@ -29,8 +35,11 @@ public class BridgeAssault {
     private Timer sendEnemyTimer, moveEnemyTimer;
     private TimerTask sendEnemy, moveEnemies;
     private int hp;
+    public volatile boolean gameOver;
+    public Bundle gameOverState;
 
-    public BridgeAssault(int n, int rows, int columns) {
+    public BridgeAssault(FragmentActivity src, int n, int rows, int columns) {
+        FragmentActivity source = src;
         if (rows < MIN_BRIDGE_ROWS || columns < MIN_BRIDGE_COLUMNS) {
             rows = MIN_BRIDGE_ROWS;
             columns = MIN_BRIDGE_COLUMNS;
@@ -73,7 +82,7 @@ public class BridgeAssault {
                         hp--;
                         Log.d("HP", Integer.toString(hp));
                         if(hp <= 0){
-                            endGame();
+                            endGame(false, true);
                         }
                     }
                     else {
@@ -84,12 +93,12 @@ public class BridgeAssault {
                             //check for lose condition: broken bridge
                             if(bridge.isBroken()){
                                 Log.d("BRIDGE","BROKEN");
-                                endGame();
+                                endGame(false, false);
                             }
                             //check for win condition: no more enemies
                             if(attackingEnemies.isEmpty() && nextEnemyIndex >= numEnemies){
                                 Log.d("ENEMIES","FINISHED");
-                                endGame();
+                                endGame(true, false);
                             }
                         }
                     }
@@ -97,6 +106,8 @@ public class BridgeAssault {
             }
         };
         hp = MAX_HP;
+        gameOver = false;
+        gameOverState = new Bundle();
     }
 
     private void checkForEliminations(Bridge bridge) {
@@ -115,9 +126,14 @@ public class BridgeAssault {
         moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
-    private void endGame() {
+    private void endGame(boolean won, boolean died) {
         Log.d("GAME","OVER");
         sendEnemyTimer.cancel();
         moveEnemyTimer.cancel();
+
+        gameOverState.putBoolean("WON",won);
+        gameOverState.putBoolean("DIED",died);
+
+        gameOver = true;
     }
 }
