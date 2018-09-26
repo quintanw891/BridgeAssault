@@ -31,9 +31,10 @@ public class GameActivity extends AppCompatActivity implements GameOverDialogFra
 
     BridgeAssault game;
     ImageView[][] gameSpaces;
+    private boolean resumed;
     int rows, numEnemies, columns;
     private Timer UITimer;
-    private TimerTask UITimerTask;
+    private TimerTask UItask;
     private Handler UIHandler;
     private Runnable updateInterface;
     private final int UI_DELAY = 100;
@@ -120,19 +121,35 @@ public class GameActivity extends AppCompatActivity implements GameOverDialogFra
             }
         };
         game = new BridgeAssault(this,numEnemies,rows,columns);
-
         UITimer = new Timer();
         UIHandler = new Handler();
-        UITimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                UIHandler.post(updateInterface);
-                checkGameOver();
-            }
-        };
-        UITimer.schedule(UITimerTask,0,UI_DELAY);
+    }
 
-        game.startGame();
+    private class UITask extends TimerTask{
+        @Override
+        public void run() {
+            UIHandler.post(updateInterface);
+            checkGameOver();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resumed = true;
+        if(!game.gameOver){
+            UItask = new UITask();
+            UITimer.schedule(UItask,0,UI_DELAY);
+            game.resumeGame();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        resumed = false;
+        UItask.cancel();
+        game.pauseGame();
     }
 
     public void tapSpace(View view) {
@@ -147,7 +164,7 @@ public class GameActivity extends AppCompatActivity implements GameOverDialogFra
     }
 
     private void checkGameOver(){
-        if(game.gameOver && dialogFragment == null){
+        if(resumed && game.gameOver && dialogFragment == null){
             dialogFragment = new GameOverDialogFragment();
             dialogFragment.setArguments(game.gameOverState);
             dialogFragment.show(getSupportFragmentManager(), "game over");

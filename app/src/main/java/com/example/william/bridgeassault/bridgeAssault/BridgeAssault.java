@@ -33,8 +33,9 @@ public class BridgeAssault {
     private int nextEnemyIndex;
     private Vector<Enemy> attackingEnemies;
     private Timer sendEnemyTimer, moveEnemyTimer;
-    private TimerTask sendEnemy, moveEnemies;
+    private  TimerTask sendEnemy, moveEnemies;
     private int hp;
+    private boolean doneSendingEnemies;
     public volatile boolean gameOver;
     public Bundle gameOverState;
 
@@ -52,62 +53,84 @@ public class BridgeAssault {
         nextEnemyIndex = 0;
         attackingEnemies = new Vector<Enemy>();
         sendEnemyTimer = new Timer();
-        sendEnemy = new TimerTask() {
-            public void run() {
-                Enemy nextEnemy = enemies[nextEnemyIndex];
-                //Log.d("SENDING", nextEnemy.toString());
-                Enemy.MoveResults results = nextEnemy.enterBridge(bridge);
-                if (results.movementSuccessful) {
-                    if (results.enemyIsAttacking) {
-                        attackingEnemies.add(nextEnemy);
-                        //check if this movement caused elimination of any other attacking enemies
-                        checkForEliminations(bridge);
-                    }
-                    nextEnemyIndex++;
-                }
-                if (nextEnemyIndex >= numEnemies)
-                    sendEnemyTimer.cancel();
-            }
-        };
         moveEnemyTimer = new Timer();
-        moveEnemies = new TimerTask() {
-            public void run() {
-                for (int i = 0; i < attackingEnemies.size(); i++) {
-                    Enemy enemyToMove = attackingEnemies.get(i);
-                    //Log.d("MOVING",enemyToMove.toString());
-                    if (enemyToMove.getRow() + 1 == bridge.rows) {
-                        //hit player
-                        bridge.spaces[enemyToMove.getRow()][enemyToMove.getColumn()].setType(SpaceType.NORMAL);
-                        attackingEnemies.remove(enemyToMove);
-                        hp--;
-                        Log.d("HP", Integer.toString(hp));
-                        if(hp <= 0){
-                            endGame(false, true);
-                        }
-                    }
-                    else {
-                        if (!enemyToMove.move(bridge).enemyIsAttacking) {
-                            attackingEnemies.remove(enemyToMove);
-                            //check if this movement caused elimination of any other attacking enemies
-                            checkForEliminations(bridge);
-                            //check for lose condition: broken bridge
-                            if(bridge.isBroken()){
-                                Log.d("BRIDGE","BROKEN");
-                                endGame(false, false);
-                            }
-                            //check for win condition: no more enemies
-                            if(attackingEnemies.isEmpty() && nextEnemyIndex >= numEnemies){
-                                Log.d("ENEMIES","FINISHED");
-                                endGame(true, false);
-                            }
-                        }
-                    }
-                }
-            }
-        };
         hp = MAX_HP;
+        doneSendingEnemies = false;
         gameOver = false;
         gameOverState = new Bundle();
+    }
+
+    private class SendEnemyTask extends TimerTask{
+        @Override
+        public void run() {
+            Enemy nextEnemy = enemies[nextEnemyIndex];
+            //Log.d("SENDING", nextEnemy.toString());
+            Enemy.MoveResults results = nextEnemy.enterBridge(bridge);
+            if (results.movementSuccessful) {
+                if (results.enemyIsAttacking) {
+                    attackingEnemies.add(nextEnemy);
+                    //check if this movement caused elimination of any other attacking enemies
+                    checkForEliminations(bridge);
+                }
+                nextEnemyIndex++;
+            }
+            if (nextEnemyIndex >= numEnemies) {
+                doneSendingEnemies = true;
+                sendEnemy.cancel();
+            }
+        }
+    }
+
+    private class MoveEnemyTask extends TimerTask{
+        @Override
+        public void run() {
+            for (int i = 0; i < attackingEnemies.size(); i++) {
+                Enemy enemyToMove = attackingEnemies.get(i);
+                //Log.d("MOVING",enemyToMove.toString());
+                if (enemyToMove.getRow() + 1 == bridge.rows) {
+                    //hit player
+                    bridge.spaces[enemyToMove.getRow()][enemyToMove.getColumn()].setType(SpaceType.NORMAL);
+                    attackingEnemies.remove(enemyToMove);
+                    hp--;
+                    Log.d("HP", Integer.toString(hp));
+                    if(hp <= 0){
+                        endGame(false, true);
+                    }
+                }
+                else {
+                    if (!enemyToMove.move(bridge).enemyIsAttacking) {
+                        attackingEnemies.remove(enemyToMove);
+                        //check if this movement caused elimination of any other attacking enemies
+                        checkForEliminations(bridge);
+                        //check for lose condition: broken bridge
+                        if(bridge.isBroken()){
+                            Log.d("BRIDGE","BROKEN");
+                            endGame(false, false);
+                        }
+
+                    }
+                }
+                //check for win condition: no more enemies
+                if(attackingEnemies.isEmpty() && nextEnemyIndex >= numEnemies){
+                    Log.d("ENEMIES","FINISHED");
+                    endGame(true, false);
+                }
+            }
+        }
+    }
+
+    public void resumeGame(){
+        if(!doneSendingEnemies){
+            sendEnemy = new SendEnemyTask();
+            sendEnemyTimer.schedule(sendEnemy, 500, SEND_ENEMY_DELAY);
+        }
+        moveEnemies = new MoveEnemyTask();
+        moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
+    }
+
+    public void pauseGame(){
+        sendEnemy.cancel();
+        moveEnemies.cancel();
     }
 
     private void checkForEliminations(Bridge bridge) {
@@ -119,11 +142,6 @@ public class BridgeAssault {
                 attackingEnemies.remove(enemyToCheck);
             }
         }
-    }
-
-    public void startGame() {
-        sendEnemyTimer.schedule(sendEnemy, 500, SEND_ENEMY_DELAY);
-        moveEnemyTimer.schedule(moveEnemies, 0, MOVE_ENEMY_DELAY);
     }
 
     private void endGame(boolean won, boolean died) {

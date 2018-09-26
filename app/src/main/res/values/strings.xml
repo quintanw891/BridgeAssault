@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">BridgeAssault</string>
     <string name="button_play">Easy</string>
-    <string name="tag_easy_mode" translatable="false">6 15 3</string>
+    <string name="tag_easy_mode" translatable="false">6 5 3</string>
     <string name="game_over_dialog_title_lose">Game Over</string>
     <string name="game_over_dialog_title_win">Victory</string>
     <string name="game_over_dialog_content_win">Defeated all invaders.</string>
